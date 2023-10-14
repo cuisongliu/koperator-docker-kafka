@@ -5,18 +5,14 @@ ARG kafka_version=3.4.1
 ARG kafka_distro_base_url=https://dlcdn.apache.org/kafka
 
 ENV kafka_distro=kafka_$scala_version-$kafka_version.tgz
-ENV kafka_distro_asc=$kafka_distro.asc
-
-RUN apk add --no-cache gnupg
+ENV kafka_distro_md5=$kafka_distro.md5
 
 WORKDIR /var/tmp
 
 RUN wget -q $kafka_distro_base_url/$kafka_version/$kafka_distro
-RUN wget -q $kafka_distro_base_url/$kafka_version/$kafka_distro_asc
-RUN wget -q $kafka_distro_base_url/KEYS
+RUN wget -q $kafka_distro_base_url/$kafka_version/$kafka_distro_md5
 
-RUN gpg --import KEYS
-RUN gpg --verify $kafka_distro_asc $kafka_distro
+RUN echo "$(cat $kafka_distro_md5)  $kafka_distro" | md5sum -c -
 
 RUN tar -xzf $kafka_distro
 RUN rm -r kafka_$scala_version-$kafka_version/bin/windows
